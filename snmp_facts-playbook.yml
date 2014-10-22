@@ -1,0 +1,26 @@
+---
+- hosts: switches
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Get SNMP information from switches
+      snmp_facts: host={{ inventory_hostname }} version=v3 level=authPriv username=snmpv3 integrity=sha privacy=aes authkey=s9k3acdfeasDwk privkey=daddkws3azscx9jeSDM
+
+- hosts: ap
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Get SNMP information from access-points 
+      snmp_facts: host={{ inventory_hostname }} version=v2 community=cisco
+
+- hosts: printers
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: testing printers
+      snmp_facts: host={{ inventory_hostname }} version=v2 community=public
+
+- hosts: template
+  connection: local
+  roles:
+  - create-template

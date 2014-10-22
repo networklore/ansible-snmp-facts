@@ -1,0 +1,4 @@
+---
+
+- name: Create demo template
+  template: src=netdevice.j2 dest={{ ansible_env.HOME }}/netdevice

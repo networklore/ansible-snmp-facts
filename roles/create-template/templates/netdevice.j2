@@ -1,0 +1,12 @@
+# Connections will be added here
+
+{% for host in groups['snmp'] %}
+host: {{ hostvars[host].inventory_hostname }}
+sysdescr: {{ hostvars[host].ansible_sysdescr }}
+sysobjectid: {{ hostvars[host].ansible_sysobjectid }}
+syscontact: {{ hostvars[host].ansible_syscontact }}
+sysname: {{ hostvars[host].ansible_sysname }}
+syslocation: {{ hostvars[host].ansible_syslocation }}
+ipaddresses: {{ hostvars[host].ansible_all_ipv4_addresses }}
+{% endfor %}
+

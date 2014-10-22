@@ -1,0 +1,16 @@
+[switches]
+172.29.50.3
+
+[ap]
+172.29.50.4
+
+[printers]
+172.29.51.2
+
+[template]
+localhost
+
+[snmp:children]
+ap
+switches
+printers
