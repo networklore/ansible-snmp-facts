@@ -65,6 +65,24 @@ import sys
 
 from collections import defaultdict
 
+def decode_hex(hexstring):
+ 
+    if len(hexstring) < 3:
+        return hexstring
+    if hexstring[:2] == "0x":
+        return hexstring[2:].decode("hex")
+    else:
+        return hexstring
+
+def decode_mac(hexstring):
+
+    if len(hexstring) != 14:
+        return hexstring
+    if hexstring[:2] == "0x":
+        return hexstring[2:]
+    else:
+        return hexstring
+
 def lookup_adminstatus(int_adminstatus):
     if int_adminstatus == 1:
         return "up"
@@ -235,7 +253,7 @@ def main():
     snmp_result = Tree()                               
 
     
-    snmp_result['ansible_facts']['ansible_sysdescr'] = sysDescr
+    snmp_result['ansible_facts']['ansible_sysdescr'] = decode_hex(sysDescr)
     snmp_result['ansible_facts']['ansible_sysobjectid'] = sysObjectId
     snmp_result['ansible_facts']['ansible_sysuptime'] = sysUpTime
     snmp_result['ansible_facts']['ansible_syscontact'] = sysContact
@@ -289,7 +307,7 @@ def main():
                 snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['speed'] = current_val
             if "1.3.6.1.2.1.2.2.1.6" in current_oid: # ifPhysAddress
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
-                snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['mac'] = current_val
+                snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['mac'] = decode_mac(current_val)
             if "1.3.6.1.2.1.2.2.1.7" in current_oid: # ifAdminStatus
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['adminstatus'] = lookup_adminstatus(int(current_val))
