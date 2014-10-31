@@ -148,6 +148,7 @@ def main():
             privkey=dict(required=False),
 
             removeplaceholder=dict(required=False)),
+            required_together = ( ['username','level','integrity','authkey'],['privacy','privkey'],),
         supports_check_mode=False)
 
     m_args = module.params
@@ -173,46 +174,11 @@ def main():
             })
             sys.exit(1)
 
-        if m_args['level'] == None:
-            print json.dumps({
-                "failed" : True,
-                "msg"    : "Level not set when using snmp version 3"
-            })
-            sys.exit(1)
-
-        if m_args['level'] == "authNoPriv" and m_args['integrity'] == None:
-            print json.dumps({
-                "failed" : True,
-                "msg"    : "Integrity algorithm not set when using authNoPriv"
-            })
-            sys.exit(1)
-
-      
-        if m_args['level'] == "authPriv" and m_args['integrity'] == None:
-            print json.dumps({
-                "failed" : True,
-                "msg"    : "Integrity algorithm not set when using authPriv"
-            })
-            sys.exit(1)
 
         if m_args['level'] == "authPriv" and m_args['privacy'] == None:
             print json.dumps({
                 "failed" : True,
                 "msg"    : "Privacy algorithm not set when using authPriv"
-            })
-            sys.exit(1)
-
-        if m_args['authkey'] == None:
-            print json.dumps({
-                "failed" : True,
-                "msg"    : "Authentication key has to be set for SNMP v3"
-            })
-            sys.exit(1)
-
-        if m_args['level'] == "authPriv" and m_args['privkey'] == None:
-            print json.dumps({
-                "failed" : True,
-                "msg"    : "Privacy key not set when using authPriv"
             })
             sys.exit(1)
 
