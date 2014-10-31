@@ -63,7 +63,7 @@ options:
     privacy:
         description:
             - Encryption algoritm, required if level is authPriv
-        choices: [ 'md5', 'sha' ]
+        choices: [ 'des', 'aes' ]
         required: false
     privkey:
         description:
