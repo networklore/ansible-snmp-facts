@@ -40,7 +40,34 @@ options:
         required: true
     community:
         description:
-            - The SNMP community, required if community is v2/v2c
+            - The SNMP community string, required if version is v2/v2c
+        required: false
+    level:
+        description:
+            - Authentication level, required if version is v3
+        choices: [ 'authPriv', 'authNoPriv' ]
+        required: false
+    username:
+        description:
+            - Username for SNMPv3, required if version is v3
+        required: false
+    integrity:
+        description:
+            - Hashing algoritm, required if version is v3
+        choices: [ 'md5', 'sha' ]
+        required: false
+    authkey:
+        description:
+            - Authentication key, required if version is v3
+        required: false
+    privacy:
+        description:
+            - Encryption algoritm, required if level is authPriv
+        choices: [ 'md5', 'sha' ]
+        required: false
+    privkey:
+        description:
+            - Encryption key, required if version is authPriv
         required: false
 '''
 
