@@ -21,7 +21,7 @@ DOCUMENTATION = '''
 module: snmp_facts
 author: Patrick Ogenstad (@networklore)
 notes:
-    - Version 0.5
+    - Version 0.6
 short_description: Retrive facts for a device using SNMP.
 description:
     - Retrieve facts for a device using SNMP, the facts will be
@@ -160,28 +160,16 @@ def main():
     # Verify that we receive a community when using snmp v2
     if m_args['version'] == "v2" or m_args['version'] == "v2c":
         if m_args['community'] == False:
-            print json.dumps({
-                "failed" : True,
-                "msg"    : "Community not set when using snmp version 2"
-            })
-            sys.exit(1)            
-
+            module.fail_json(msg='Community not set when using snmp version 2')
+            
     if m_args['version'] == "v3":
         if m_args['username'] == None:
-            print json.dumps({
-                "failed" : True,
-                "msg"    : "Username not set when using snmp version 3"
-            })
-            sys.exit(1)
-
+            module.fail_json(msg='Username not set when using snmp version 3')
 
         if m_args['level'] == "authPriv" and m_args['privacy'] == None:
-            print json.dumps({
-                "failed" : True,
-                "msg"    : "Privacy algorithm not set when using authPriv"
-            })
-            sys.exit(1)
+            module.fail_json(msg='Privacy algorithm not set when using authPriv')
 
+            
         if m_args['integrity'] == "sha":
             INTEGRITY_PROTO = cmdgen.usmHMACSHAAuthProtocol
         elif m_args['integrity'] == "md5":
@@ -218,11 +206,7 @@ def main():
 
 
     if errorIndication:
-        print json.dumps({
-            "failed" : True,
-            "msg"    : str(errorIndication)
-        })
-        sys.exit(1)        
+        module.fail_json(msg=str(errorIndication))
 
     for oid, val in varBinds:
         current_oid = oid.prettyPrint()
@@ -270,11 +254,7 @@ def main():
 
 
     if errorIndication:
-        print json.dumps({
-            "failed" : True,
-            "msg"    : str(errorIndication)
-        })
-        sys.exit(1)        
+        module.fail_json(msg=str(errorIndication))
 
     interface_indexes = []
     
