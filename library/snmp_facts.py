@@ -171,30 +171,30 @@ def main():
 
             
         if m_args['integrity'] == "sha":
-            INTEGRITY_PROTO = cmdgen.usmHMACSHAAuthProtocol
+            integrity_proto = cmdgen.usmHMACSHAAuthProtocol
         elif m_args['integrity'] == "md5":
-            INTEGRITY_PROTO = cmdgen.usmHMACMD5AuthProtocol
+            integrity_proto = cmdgen.usmHMACMD5AuthProtocol
 
         if m_args['privacy'] == "aes":
-            PRIVACY_PROTO = cmdgen.usmAesCfb128Protocol
+            privacy_proto = cmdgen.usmAesCfb128Protocol
         elif m_args['privacy'] == "des":
-            PRIVACY_PROTO = cmdgen.usmDESPrivProtocol
+            privacy_proto = cmdgen.usmDESPrivProtocol
     
     # Use SNMP Version 2
     if m_args['version'] == "v2" or m_args['version'] == "v2c":
-        SNMP_AUTH = cmdgen.CommunityData(m_args['community'])
+        snmp_auth = cmdgen.CommunityData(m_args['community'])
 
     # Use SNMP Version 3 with authNoPriv
     elif m_args['level'] == "authNoPriv":
-        SNMP_AUTH = cmdgen.UsmUserData(m_args['username'], authKey=m_args['authkey'], authProtocol=INTEGRITY_PROTO)
+        snmp_auth = cmdgen.UsmUserData(m_args['username'], authKey=m_args['authkey'], authProtocol=integrity_proto)
 
     # Use SNMP Version 3 with authPriv
     else:
-        SNMP_AUTH = cmdgen.UsmUserData(m_args['username'], authKey=m_args['authkey'], privKey=m_args['privkey'], authProtocol=INTEGRITY_PROTO, privProtocol=PRIVACY_PROTO)
+        snmp_auth = cmdgen.UsmUserData(m_args['username'], authKey=m_args['authkey'], privKey=m_args['privkey'], authProtocol=integrity_proto, privProtocol=privacy_proto)
 
             
     errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
-        SNMP_AUTH,
+        snmp_auth,
         cmdgen.UdpTransportTarget((m_args['host'], 161)),
         cmdgen.MibVariable('.1.3.6.1.2.1.1.1.0',), # sysDescr
         cmdgen.MibVariable('.1.3.6.1.2.1.1.2.0',), # sysObjectId
@@ -239,7 +239,7 @@ def main():
 
 
     errorIndication, errorStatus, errorIndex, varTable = cmdGen.nextCmd(
-        SNMP_AUTH,
+        snmp_auth,
         cmdgen.UdpTransportTarget((m_args['host'], 161)), 
         cmdgen.MibVariable('.1.3.6.1.2.1.2.2.1.1',), # ifIndex
         cmdgen.MibVariable('.1.3.6.1.2.1.2.2.1.2',), # ifDescr
