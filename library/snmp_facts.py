@@ -87,10 +87,13 @@ EXAMPLES = '''
     privkey=def6789
 '''
 
-import json
-import sys
-
 from collections import defaultdict
+
+try:
+    from pysnmp.entity.rfc3413.oneliner import cmdgen
+    has_pysnmp = True
+except:
+    has_pysnmp = False
 
 def decode_hex(hexstring):
  
@@ -146,14 +149,14 @@ def main():
             privacy=dict(required=False, choices=['des', 'aes']),
             authkey=dict(required=False),
             privkey=dict(required=False),
-
             removeplaceholder=dict(required=False)),
             required_together = ( ['username','level','integrity','authkey'],['privacy','privkey'],),
         supports_check_mode=False)
 
     m_args = module.params
 
-    from pysnmp.entity.rfc3413.oneliner import cmdgen
+    if not has_pysnmp:
+        module.fail_json(msg='Missing required pysnmp module (check docs)')
 
     cmdGen = cmdgen.CommandGenerator()
 
