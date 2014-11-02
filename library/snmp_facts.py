@@ -230,6 +230,9 @@ def main():
     p = DefineOid(dotprefix=True)
     # Use v without a prefix to use with return values
     v = DefineOid(dotprefix=False)
+
+    Tree = lambda: defaultdict(Tree)
+    snmp_result = Tree()                               
     
             
     errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
@@ -251,29 +254,17 @@ def main():
         current_oid = oid.prettyPrint()
         current_val = val.prettyPrint()
         if current_oid == v.sysDescr:
-            sysDescr = current_val
+            snmp_result['ansible_facts']['ansible_sysdescr'] = decode_hex(current_val)
         elif current_oid == v.sysObjectId:
-            sysObjectId = current_val
+            snmp_result['ansible_facts']['ansible_sysobjectid'] = current_val
         elif current_oid == v.sysUpTime:
-            sysUpTime = current_val
+            snmp_result['ansible_facts']['ansible_sysuptime'] = current_val
         elif current_oid == v.sysContact:
-            sysContact = current_val
+            snmp_result['ansible_facts']['ansible_syscontact'] = current_val
         elif current_oid == v.sysName:
-            sysName = current_val
+            snmp_result['ansible_facts']['ansible_sysname'] = current_val
         elif current_oid == v.sysLocation:
-            sysLocation = current_val
-
-    Tree = lambda: defaultdict(Tree)
-    snmp_result = Tree()                               
-
-    
-    snmp_result['ansible_facts']['ansible_sysdescr'] = decode_hex(sysDescr)
-    snmp_result['ansible_facts']['ansible_sysobjectid'] = sysObjectId
-    snmp_result['ansible_facts']['ansible_sysuptime'] = sysUpTime
-    snmp_result['ansible_facts']['ansible_syscontact'] = sysContact
-    snmp_result['ansible_facts']['ansible_sysname'] = sysName
-    snmp_result['ansible_facts']['ansible_syslocation'] = sysLocation
-
+            snmp_result['ansible_facts']['ansible_syslocation'] = current_val
 
     errorIndication, errorStatus, errorIndex, varTable = cmdGen.nextCmd(
         snmp_auth,
@@ -296,8 +287,7 @@ def main():
 
     interface_indexes = []
     
-    all_ipv4_addresses = []
-    
+    all_ipv4_addresses = []     
 
     for varBinds in varTable:
         for oid, val in varBinds:
@@ -334,14 +324,10 @@ def main():
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['description'] = current_val
 
-                
-
     snmp_result['ansible_facts']['ansible_all_ipv4_addresses'] = all_ipv4_addresses
  
     module.exit_json(**snmp_result)
     
-
-
 
 main()
 
