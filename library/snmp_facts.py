@@ -145,28 +145,30 @@ def decode_mac(hexstring):
         return hexstring
 
 def lookup_adminstatus(int_adminstatus):
-    if int_adminstatus == 1:
-        return "up"
-    elif int_adminstatus == 2:
-        return "down"
-    elif int_adminstatus == 3:
-        return "testing"
+    adminstatus_options = {
+                            1: 'up',
+                            2: 'down',
+                            3: 'testing'
+                          }
+    if int_adminstatus in adminstatus_options.keys():
+        return adminstatus_options[int_adminstatus]
+    else:
+        return ""
 
 def lookup_operstatus(int_operstatus):
-    if int_operstatus == 1:
-        return "up"
-    elif int_operstatus == 2:
-        return "down"
-    elif int_operstatus == 3:
-        return "testing"
-    elif int_operstatus == 4:
-        return "unknown"
-    elif int_operstatus == 5:
-        return "dormant"
-    elif int_operstatus == 6:
-        return "notPresent"
-    elif int_operstatus == 7:
-        return "lowerLayerDown"
+    operstatus_options = {
+                           1: 'up',
+                           2: 'down',
+                           3: 'testing',
+                           4: 'unknown',
+                           5: 'dormant',
+                           6: 'notPresent',
+                           7: 'lowerLayerDown'
+                         }
+    if int_operstatus in operstatus_options.keys():
+        return operstatus_options[int_operstatus]
+    else:
+        return ""
 
 def main():
     module = AnsibleModule(
@@ -239,11 +241,11 @@ def main():
         snmp_auth,
         cmdgen.UdpTransportTarget((m_args['host'], 161)),
         cmdgen.MibVariable(p.sysDescr,),
-        cmdgen.MibVariable(p.sysObjectId,), # sysObjectId
-        cmdgen.MibVariable(p.sysUpTime,), # sysUpTime
-        cmdgen.MibVariable(p.sysContact,), # sysContact 
-        cmdgen.MibVariable(p.sysName,), # sysName 
-        cmdgen.MibVariable(p.sysLocation,), # sysLocation
+        cmdgen.MibVariable(p.sysObjectId,), 
+        cmdgen.MibVariable(p.sysUpTime,),
+        cmdgen.MibVariable(p.sysContact,), 
+        cmdgen.MibVariable(p.sysName,),
+        cmdgen.MibVariable(p.sysLocation,),
     )
 
 
