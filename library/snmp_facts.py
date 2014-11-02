@@ -234,8 +234,8 @@ def main():
     v = DefineOid(dotprefix=False)
 
     Tree = lambda: defaultdict(Tree)
-    snmp_result = Tree()                               
-    
+                               
+    results = Tree()
             
     errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
         snmp_auth,
@@ -256,17 +256,17 @@ def main():
         current_oid = oid.prettyPrint()
         current_val = val.prettyPrint()
         if current_oid == v.sysDescr:
-            snmp_result['ansible_facts']['ansible_sysdescr'] = decode_hex(current_val)
+            results['ansible_sysdescr'] = decode_hex(current_val)
         elif current_oid == v.sysObjectId:
-            snmp_result['ansible_facts']['ansible_sysobjectid'] = current_val
+            results['ansible_sysobjectid'] = current_val
         elif current_oid == v.sysUpTime:
-            snmp_result['ansible_facts']['ansible_sysuptime'] = current_val
+            results['ansible_sysuptime'] = current_val
         elif current_oid == v.sysContact:
-            snmp_result['ansible_facts']['ansible_syscontact'] = current_val
+            results['ansible_syscontact'] = current_val
         elif current_oid == v.sysName:
-            snmp_result['ansible_facts']['ansible_sysname'] = current_val
+            results['ansible_sysname'] = current_val
         elif current_oid == v.sysLocation:
-            snmp_result['ansible_facts']['ansible_syslocation'] = current_val
+            results['ansible_syslocation'] = current_val
 
     errorIndication, errorStatus, errorIndex, varTable = cmdGen.nextCmd(
         snmp_auth,
@@ -297,26 +297,26 @@ def main():
             current_val = val.prettyPrint()
             if v.ifIndex in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
-                snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['ifindex'] = current_val
+                results['ansible_interfaces'][ifIndex]['ifindex'] = current_val
                 interface_indexes.append(ifIndex)
             if v.ifDescr in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
-                snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['name'] = current_val
+                results['ansible_interfaces'][ifIndex]['name'] = current_val
             if v.ifMtu in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
-                snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['mtu'] = current_val
+                results['ansible_interfaces'][ifIndex]['mtu'] = current_val
             if v.ifMtu in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
-                snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['speed'] = current_val
+                results['ansible_interfaces'][ifIndex]['speed'] = current_val
             if v.ifPhysAddress in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
-                snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['mac'] = decode_mac(current_val)
+                results['ansible_interfaces'][ifIndex]['mac'] = decode_mac(current_val)
             if v.ifAdminStatus in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
-                snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['adminstatus'] = lookup_adminstatus(int(current_val))
+                results['ansible_interfaces'][ifIndex]['adminstatus'] = lookup_adminstatus(int(current_val))
             if v.ifOperStatus in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
-                snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['operstatus'] = lookup_operstatus(int(current_val))
+                results['ansible_interfaces'][ifIndex]['operstatus'] = lookup_operstatus(int(current_val))
             if v.ipAdEntAddr in current_oid:
                 ipIndex = int(current_oid.rsplit('.', 1)[-1])
                 all_ipv4_addresses.append(current_val)
@@ -324,11 +324,11 @@ def main():
 
             if v.ifAlias in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
-                snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['description'] = current_val
+                results['ansible_interfaces'][ifIndex]['description'] = current_val
 
-    snmp_result['ansible_facts']['ansible_all_ipv4_addresses'] = all_ipv4_addresses
+    results['ansible_all_ipv4_addresses'] = all_ipv4_addresses
  
-    module.exit_json(**snmp_result)
+    module.exit_json(ansible_facts=results)
     
 
 main()
