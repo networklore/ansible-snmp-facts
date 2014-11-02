@@ -123,7 +123,9 @@ class DefineOid(object):
         self.ifAlias       = dp + "1.3.6.1.2.1.31.1.1.1.18"
 
         # From IP-MIB
-        self.ipAdEntAddr = dp + "1.3.6.1.2.1.4.20.1.1"
+        self.ipAdEntAddr    = dp + "1.3.6.1.2.1.4.20.1.1"
+        self.ipAdEntIfIndex = dp + "1.3.6.1.2.1.4.20.1.2"
+        self.ipAdEntNetMask = dp + "1.3.6.1.2.1.4.20.1.3"
         
 
 def decode_hex(hexstring):
@@ -279,10 +281,12 @@ def main():
         cmdgen.MibVariable(p.ifAdminStatus,),
         cmdgen.MibVariable(p.ifOperStatus,),
         cmdgen.MibVariable(p.ipAdEntAddr,), 
+        cmdgen.MibVariable(p.ipAdEntIfIndex,), 
+        cmdgen.MibVariable(p.ipAdEntNetMask,), 
 
         cmdgen.MibVariable(p.ifAlias,),
     )
-
+ 
 
     if errorIndication:
         module.fail_json(msg=str(errorIndication))
@@ -318,7 +322,8 @@ def main():
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 results['ansible_interfaces'][ifIndex]['operstatus'] = lookup_operstatus(int(current_val))
             if v.ipAdEntAddr in current_oid:
-                ipIndex = int(current_oid.rsplit('.', 1)[-1])
+                #ipIndex = int(current_oid.rsplit('.', 1)[-1])
+                #ipv4_address_indexes.append(ipIndex)
                 all_ipv4_addresses.append(current_val)
 
 
