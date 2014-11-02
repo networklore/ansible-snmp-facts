@@ -87,6 +87,7 @@ EXAMPLES = '''
     privkey=def6789
 '''
 
+from ansible.module_utils.basic import *
 from collections import defaultdict
 
 try:
@@ -94,6 +95,36 @@ try:
     has_pysnmp = True
 except:
     has_pysnmp = False
+
+class DefineOid(object):
+
+    def __init__(self,dotprefix=False):
+        if dotprefix:
+            dp = "."
+        else:
+            dp = ""
+
+        # From SNMPv2-MIB
+        self.sysDescr    = dp + "1.3.6.1.2.1.1.1.0"
+        self.sysObjectId = dp + "1.3.6.1.2.1.1.2.0"
+        self.sysUpTime   = dp + "1.3.6.1.2.1.1.3.0"
+        self.sysContact  = dp + "1.3.6.1.2.1.1.4.0"
+        self.sysName     = dp + "1.3.6.1.2.1.1.5.0"
+        self.sysLocation = dp + "1.3.6.1.2.1.1.6.0"
+        
+        # From IF-MIB
+        self.ifIndex       = dp + "1.3.6.1.2.1.2.2.1.1"
+        self.ifDescr       = dp + "1.3.6.1.2.1.2.2.1.2"
+        self.ifMtu         = dp + "1.3.6.1.2.1.2.2.1.4"
+        self.ifSpeed       = dp + "1.3.6.1.2.1.2.2.1.5"
+        self.ifPhysAddress = dp + "1.3.6.1.2.1.2.2.1.6"
+        self.ifAdminStatus = dp + "1.3.6.1.2.1.2.2.1.7"
+        self.ifOperStatus  = dp + "1.3.6.1.2.1.2.2.1.8"
+        self.ifAlias       = dp + "1.3.6.1.2.1.31.1.1.1.18"
+
+        # From IP-MIB
+        self.ipAdEntAddr = dp + "1.3.6.1.2.1.4.20.1.1"
+        
 
 def decode_hex(hexstring):
  
@@ -195,16 +226,21 @@ def main():
     else:
         snmp_auth = cmdgen.UsmUserData(m_args['username'], authKey=m_args['authkey'], privKey=m_args['privkey'], authProtocol=integrity_proto, privProtocol=privacy_proto)
 
+    # Use p to prefix OIDs with a dot for polling
+    p = DefineOid(dotprefix=True)
+    # Use v without a prefix to use with return values
+    v = DefineOid(dotprefix=False)
+    
             
     errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
         snmp_auth,
         cmdgen.UdpTransportTarget((m_args['host'], 161)),
-        cmdgen.MibVariable('.1.3.6.1.2.1.1.1.0',), # sysDescr
-        cmdgen.MibVariable('.1.3.6.1.2.1.1.2.0',), # sysObjectId
-        cmdgen.MibVariable('.1.3.6.1.2.1.1.3.0',), # sysUpTime
-        cmdgen.MibVariable('.1.3.6.1.2.1.1.4.0',), # sysContact 
-        cmdgen.MibVariable('.1.3.6.1.2.1.1.5.0',), # sysName 
-        cmdgen.MibVariable('.1.3.6.1.2.1.1.6.0',), # sysLocation
+        cmdgen.MibVariable(p.sysDescr,),
+        cmdgen.MibVariable(p.sysObjectId,), # sysObjectId
+        cmdgen.MibVariable(p.sysUpTime,), # sysUpTime
+        cmdgen.MibVariable(p.sysContact,), # sysContact 
+        cmdgen.MibVariable(p.sysName,), # sysName 
+        cmdgen.MibVariable(p.sysLocation,), # sysLocation
     )
 
 
@@ -214,19 +250,17 @@ def main():
     for oid, val in varBinds:
         current_oid = oid.prettyPrint()
         current_val = val.prettyPrint()
-        if current_oid == "1.3.6.1.2.1.1.1.0":
+        if current_oid == v.sysDescr:
             sysDescr = current_val
-        elif current_oid == "1.3.6.1.2.1.1.2.0":
+        elif current_oid == v.sysObjectId:
             sysObjectId = current_val
-        elif current_oid == "1.3.6.1.2.1.1.3.0":
+        elif current_oid == v.sysUpTime:
             sysUpTime = current_val
-        elif current_oid == "1.3.6.1.2.1.1.3.0":
-            sysUpTime = current_val
-        elif current_oid == "1.3.6.1.2.1.1.4.0":
+        elif current_oid == v.sysContact:
             sysContact = current_val
-        elif current_oid == "1.3.6.1.2.1.1.5.0":
+        elif current_oid == v.sysName:
             sysName = current_val
-        elif current_oid == "1.3.6.1.2.1.1.6.0":
+        elif current_oid == v.sysLocation:
             sysLocation = current_val
 
     Tree = lambda: defaultdict(Tree)
@@ -244,15 +278,16 @@ def main():
     errorIndication, errorStatus, errorIndex, varTable = cmdGen.nextCmd(
         snmp_auth,
         cmdgen.UdpTransportTarget((m_args['host'], 161)), 
-        cmdgen.MibVariable('.1.3.6.1.2.1.2.2.1.1',), # ifIndex
-        cmdgen.MibVariable('.1.3.6.1.2.1.2.2.1.2',), # ifDescr
-        cmdgen.MibVariable('.1.3.6.1.2.1.2.2.1.4',), # ifMtu
-        cmdgen.MibVariable('.1.3.6.1.2.1.2.2.1.5',), # ifSpeed
-        cmdgen.MibVariable('.1.3.6.1.2.1.2.2.1.6',), # ifPhysAddress
-        cmdgen.MibVariable('.1.3.6.1.2.1.2.2.1.7',), # ifAdminStatus
-        cmdgen.MibVariable('.1.3.6.1.2.1.2.2.1.8',), # ifOperStatus
-        cmdgen.MibVariable('.1.3.6.1.2.1.4.20.1.1',), # ipAdEntAddr
-        cmdgen.MibVariable('.1.3.6.1.2.1.31.1.1.1.18',), # ifAlias
+        cmdgen.MibVariable(p.ifIndex,),
+        cmdgen.MibVariable(p.ifDescr,),
+        cmdgen.MibVariable(p.ifMtu,),
+        cmdgen.MibVariable(p.ifSpeed,),
+        cmdgen.MibVariable(p.ifPhysAddress,),
+        cmdgen.MibVariable(p.ifAdminStatus,),
+        cmdgen.MibVariable(p.ifOperStatus,),
+        cmdgen.MibVariable(p.ipAdEntAddr,), 
+
+        cmdgen.MibVariable(p.ifAlias,),
     )
 
 
@@ -268,34 +303,34 @@ def main():
         for oid, val in varBinds:
             current_oid = oid.prettyPrint()
             current_val = val.prettyPrint()
-            if "1.3.6.1.2.1.2.2.1.1" in current_oid: # ifIndex
+            if v.ifIndex in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['ifindex'] = current_val
                 interface_indexes.append(ifIndex)
-            if "1.3.6.1.2.1.2.2.1.2" in current_oid: # ifDescr
+            if v.ifDescr in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['name'] = current_val
-            if "1.3.6.1.2.1.2.2.1.4" in current_oid: # ifMtu
+            if v.ifMtu in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['mtu'] = current_val
-            if "1.3.6.1.2.1.2.2.1.5" in current_oid: # ifSpeed
+            if v.ifMtu in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['speed'] = current_val
-            if "1.3.6.1.2.1.2.2.1.6" in current_oid: # ifPhysAddress
+            if v.ifPhysAddress in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['mac'] = decode_mac(current_val)
-            if "1.3.6.1.2.1.2.2.1.7" in current_oid: # ifAdminStatus
+            if v.ifAdminStatus in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['adminstatus'] = lookup_adminstatus(int(current_val))
-            if "1.3.6.1.2.1.2.2.1.8" in current_oid: # ifOperStatus
+            if v.ifOperStatus in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['operstatus'] = lookup_operstatus(int(current_val))
-            if "1.3.6.1.2.1.4.20.1.1" in current_oid: # ipAdEntAddr
+            if v.ipAdEntAddr in current_oid:
                 ipIndex = int(current_oid.rsplit('.', 1)[-1])
                 all_ipv4_addresses.append(current_val)
 
 
-            if "1.3.6.1.2.1.31.1.1.1.18" in current_oid: # ifAlias
+            if v.ifAlias in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 snmp_result['ansible_facts']['ansible_interfaces'][ifIndex]['description'] = current_val
 
@@ -307,7 +342,6 @@ def main():
     
 
 
-from ansible.module_utils.basic import *
 
 main()
 
