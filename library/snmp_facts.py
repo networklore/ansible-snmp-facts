@@ -21,7 +21,7 @@ DOCUMENTATION = '''
 module: snmp_facts
 author: Patrick Ogenstad (@networklore)
 notes:
-    - Version 0.6
+    - Version 0.7
 short_description: Retrive facts for a device using SNMP.
 description:
     - Retrieve facts for a device using SNMP, the facts will be
@@ -294,6 +294,7 @@ def main():
     interface_indexes = []
     
     all_ipv4_addresses = []     
+    ipv4_networks = Tree()
 
     for varBinds in varTable:
         for oid, val in varBinds:
@@ -322,14 +323,38 @@ def main():
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 results['ansible_interfaces'][ifIndex]['operstatus'] = lookup_operstatus(int(current_val))
             if v.ipAdEntAddr in current_oid:
-                #ipIndex = int(current_oid.rsplit('.', 1)[-1])
-                #ipv4_address_indexes.append(ipIndex)
+                curIPList = current_oid.rsplit('.', 4)[-4:]
+                curIP = ".".join(curIPList)
+                ipv4_networks[curIP]['address'] = current_val
                 all_ipv4_addresses.append(current_val)
-
+            if v.ipAdEntIfIndex in current_oid:
+                curIPList = current_oid.rsplit('.', 4)[-4:]
+                curIP = ".".join(curIPList)
+                ipv4_networks[curIP]['interface'] = current_val
+            if v.ipAdEntNetMask in current_oid:
+                curIPList = current_oid.rsplit('.', 4)[-4:]
+                curIP = ".".join(curIPList)
+                ipv4_networks[curIP]['netmask'] = current_val
 
             if v.ifAlias in current_oid:
                 ifIndex = int(current_oid.rsplit('.', 1)[-1])
                 results['ansible_interfaces'][ifIndex]['description'] = current_val
+
+    interface_to_ipv4 = {}
+    for ipv4_network in ipv4_networks:
+        current_interface = ipv4_networks[ipv4_network]['interface']
+        current_network = {
+                            'address':  ipv4_networks[ipv4_network]['address'],
+                            'netmask':  ipv4_networks[ipv4_network]['netmask']
+                          }
+        if not current_interface in interface_to_ipv4:
+            interface_to_ipv4[current_interface] = []
+            interface_to_ipv4[current_interface].append(current_network)
+        else:
+            interface_to_ipv4[current_interface].append(current_network)
+
+    for interface in interface_to_ipv4:
+        results['ansible_interfaces'][int(interface)]['ipv4'] = interface_to_ipv4[interface]
 
     results['ansible_all_ipv4_addresses'] = all_ipv4_addresses
  
