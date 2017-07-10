@@ -1,10 +1,14 @@
+## NOTE ABOUT REPO
+
+As of version 1.9 of Ansible this module ships as part of Ansible. There won't be any more development done in this repo and it is only left here for reference.
+
 ## ABOUT
 
-This is an [Ansible](https://github.com/ansible/ansible) module from [Networklore](http://networklore.com). The snmp_facts module collects information from network devices such as router, firewalls and switches. This information is then stored as Ansible facts which can be used in Ansible playbooks.
+This is an [Ansible](https://github.com/ansible/ansible) module from [Networklore](https://networklore.com). The snmp_facts module collects information from network devices such as router, firewalls and switches. This information is then stored as Ansible facts which can be used in Ansible playbooks.
 
 ## DOCUMENTATION
 
-Currently there isn't much documentation available, but the reasoning around this module is described in the post [Gathering Ansible facts from network devices using SNMP](http://networklore.com/ansible-snmp-facts/).
+Currently there isn't much documentation available, but the reasoning around this module is described in the post [Gathering Ansible facts from network devices using SNMP](https://networklore.com/ansible-snmp-facts/).
 
 The module itself contains basic information which shows you how to use it in a Playbook, also an example playbook comes bundled in this repo.
 
@@ -23,8 +27,7 @@ Thes modules require the following to be installed on the Ansible server:
 ## LICENSE
 
 GPL 2.0
-  
+
 ## CONTRIBUTORS
 
 - Patrick Ogenstad (@networklore)
-
